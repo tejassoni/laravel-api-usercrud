@@ -9,7 +9,6 @@ use App\Http\Controllers\Controller;
 
 class UserController extends Controller
 {
-
     use HttpResponses;    
     public function index(Request $request){
         $user = User::paginate($request->page ?? 10);
