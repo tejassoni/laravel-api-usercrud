@@ -26,9 +26,11 @@ class UserStoreApiRequest extends FormRequest
         return [
             'name' => ['required', 'alpha', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'contact' => ['required', 'string', 'min:13', 'max:13', 'unique:users,contact'],
+            'mobile' => ['required', 'string', 'min:13', 'max:13', 'unique:users,mobile'],
+            'address' => ['required', 'string'],
+            'pincode' => ['required', 'integer', 'max:999999'],
             'gender' => ['required', 'alpha', 'min:4', 'max:6'],
-            'birthdate' => ['required','date_format:d-m-Y','before:today']
+            'birthdate' => ['required', 'date_format:d-m-Y', 'before:today']
         ];
     }
 

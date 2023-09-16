@@ -26,9 +26,11 @@ class UserUpdateApiRequest extends FormRequest
         return [
             'name' => ['required', 'alpha', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,'.request()->id],
-            'contact' => ['required', 'string', 'min:13', 'max:13', 'unique:users,contact,'.request()->id],
+            'mobile' => ['required', 'string', 'min:13', 'max:13', 'unique:users,mobile,'.request()->id],
             'gender' => ['required', 'alpha', 'min:4', 'max:6'],
-            'birthdate' => ['required','date_format:d-m-Y','before:today']
+            'birthdate' => ['required','date_format:d-m-Y','before:today'],
+            'address' => ['required','string'],
+            'pincode' => ['required','integer','max:999999'],
         ];
     }
 

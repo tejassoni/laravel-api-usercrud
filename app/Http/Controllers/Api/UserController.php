@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Requests\UserStoreApiRequest;
 use App\Http\Requests\UserUpdateApiRequest;
+use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
@@ -35,7 +36,14 @@ class UserController extends Controller
     public function storeUser(UserStoreApiRequest $request)
     {
         try {
-            $user = User::create(['name' => $request->name, 'email' => $request->email, 'contact' => $request->contact, 'gender' => $request->gender, 'birthdate' => date('Y-m-d', strtotime($request->birthdate)), 'password' => Hash::make('password')]);
+
+            $fileName = null;
+            if ($request->hasFile('inputFile')) {
+                $filehandle = $this->_singleFileUploads($request, 'inputFile', 'public/user');
+                $fileName = $filehandle['data']['name'];
+            }
+
+            $user = User::create(['name' => $request->name, 'email' => $request->email, 'mobile' => $request->mobile, 'gender' => $request->gender, 'pincode' => $request->pincode, 'address' => $request->address, 'image' => $fileName, 'birthdate' => date('Y-m-d', strtotime($request->birthdate)), 'password' => Hash::make('password')]);
             return $this->success([
                 'user' => $user,
             ], "User Created Successfully...!");
@@ -51,7 +59,7 @@ class UserController extends Controller
     public function showUser(Request $request, $id)
     {
         try {
-            if ($user = User::find($id)) {
+            if ($user = User::findOrFail($id)) {
                 return $this->success([
                     'user' => $user,
                 ], "User Details Get Successfully...!");
@@ -71,8 +79,18 @@ class UserController extends Controller
     public function updateUser(UserUpdateApiRequest $request, $id)
     {
         try {
-            $user = User::find($id);
-            $user->update(['name' => $request->name, 'email' => $request->email, 'contact' => $request->contact, 'gender' => $request->gender, 'birthdate' => date('Y-m-d', strtotime($request->birthdate))]);
+            $user = User::findOrFail($id);
+            if ($request->hasFile('inputFile')) {                
+                if (Storage::exists('/public/user/'.$user->image)) {
+                    Storage::delete('/public/user/'.$user->image);
+                }
+                $filehandle = $this->_singleFileUploads($request, 'inputFile', 'public/user');
+                $fileName = $filehandle['data']['name'];
+            } else {
+                $fileName = $user->image;
+            }
+
+            $user->update(['name' => $request->name, 'email' => $request->email, 'mobile' => $request->mobile, 'pincode' => $request->pincode, 'address' => $request->address, 'gender' => $request->gender, 'image' => $fileName, 'birthdate' => date('Y-m-d', strtotime($request->birthdate))]);
             return $this->success([
                 'user' => $user,
             ], "User Updated Successfully...!");
@@ -133,5 +151,47 @@ class UserController extends Controller
             return $this->error([
             ], $ex->getMessage());
         }
+    }
+
+    /**
+     * _singleFileUploads : Complete Fileupload Handling
+     * @param  Request $request
+     * @param  $htmlformfilename : input type file name
+     * @param  $uploadfiletopath : Public folder paths 'foldername/subfoldername'
+     * @return File save with array return
+     */
+    private function _singleFileUploads($request = "", $htmlformfilename = "", $uploadfiletopath = "")
+    {
+        try {
+
+            // check parameter empty Validation
+            if (empty($request) || empty($htmlformfilename) || empty($uploadfiletopath)) {
+                throw new \Exception("Required Parameters are missing", 400);
+            }
+
+            // check if folder exist at public directory if not exist then create folder 0777 permission
+            if (!file_exists($uploadfiletopath)) {
+                $oldmask = umask(0);
+                mkdir($uploadfiletopath, 0777, true);
+                umask($oldmask);
+            }
+
+            $fileNameOnly = preg_replace("/[^a-z0-9\_\-]/i", '', basename($request->file($htmlformfilename)->getClientOriginalName(), '.' . $request->file($htmlformfilename)->getClientOriginalExtension()));
+            $fileFullName = $fileNameOnly . "_" . date('dmY') . "_" . time() . "." . $request->file($htmlformfilename)->getClientOriginalExtension();
+            $path = $request->file($htmlformfilename)->storeAs($uploadfiletopath, $fileFullName);
+            // $request->file($htmlformfilename)->move(public_path($uploadfiletopath), $fileFullName);
+            $resp['status'] = true;
+            $resp['data'] = array('name' => $fileFullName, 'url' => url('storage/' . str_replace('public/', '', $uploadfiletopath) . '/' . $fileFullName), 'path' => \storage_path('app/' . $path), 'extenstion' => $request->file($htmlformfilename)->getClientOriginalExtension(), 'type' => $request->file($htmlformfilename)->getMimeType(), 'size' => $request->file($htmlformfilename)->getSize());
+            $resp['message'] = "File uploaded successfully..!";
+        } catch (\Exception $ex) {
+            $resp['status'] = false;
+            $resp['data'] = [];
+            $resp['message'] = 'File not uploaded...!';
+            $resp['ex_message'] = $ex->getMessage();
+            $resp['ex_code'] = $ex->getCode();
+            $resp['ex_file'] = $ex->getFile();
+            $resp['ex_line'] = $ex->getLine();
+        }
+        return $resp;
     }
 }

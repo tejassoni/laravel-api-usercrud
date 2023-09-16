@@ -16,9 +16,10 @@ Server Requirements
   <li>Add User Fields</li>
   <li>Email : [ Validation Rules : Valid email address, Required ] </li>
   <li>Name : [ Validation Rules : Accept only strings and space, Required ] </li>
-  <li>Description : [ Validation Rules : Required ] </li>
+  <li>Address : [ Validation Rules : Required ] </li>
+  <li>Pincode : [ Validation Rules : Required, Max 6 digits only ] </li>
   <li>Mobile : [ Validation Rules : Max 10 Digits, Required ] </li>
-  <li>Birthday : [ Validation Rules : Required ] </li>
+  <li>Birthdate : [ Validation Rules : Required , DD-MM-YYYY, Before Today] </li>
   <li>Gender : [ Validation Rules : Accept only Male / Female, Required ] </li>
   <li>Profile Image : [ Validation Rules : Accept only JPG, PNG, Max 2 MB, Required ] </li>
   <li><b>List User Fields</b></li>
