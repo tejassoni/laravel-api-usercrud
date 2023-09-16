@@ -1,5 +1,5 @@
 # Overview
-Laravel api's for USER's CRUD operations. Without Authentication and Resource Controller.
+Laravel api's for USER's CRUD operations. Without Authentication and Without Resource Controller.
 
 Server Requirements
 =====================================
@@ -25,6 +25,8 @@ Server Requirements
   <li>All User Fields display with paginations default 10</li>
   <li><b>Delete User Fields</b></li>
   <li>User Deleted by UserID</li>
+  <li><b>Filter User Fields</b></li>
+  <li>All User Fields display with paginations default 10</li>
 </ul>
 
 # Laravel / PHP Coding Standards
